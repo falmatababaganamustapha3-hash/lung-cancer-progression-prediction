@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card p-4">
+    <h2 class="mb-4">Prediction Form</h2>
+    <p class="text-muted">Enter patient details below. Severity fields are rated from 1 (Very Low) to 9 (Very High).</p>
+
+    <form method="POST">
+        <div class="row">
+            {% for feature in feature_names %}
+            <div class="col-md-4 mb-3">
+                <label for="{{ feature }}" class="form-label">{{ feature.replace('_', ' ') }}</label>
+
+                {% if feature == 'Age' %}
+                    <input type="number" min="1" max="120" name="{{ feature }}" id="{{ feature }}" class="form-control" placeholder="e.g. 45" required>
+
+                {% elif feature == 'Gender' %}
+                    <select name="{{ feature }}" id="{{ feature }}" class="form-select" required>
+                        <option value="" disabled selected>Select...</option>
+                        <option value="1">Male</option>
+                        <option value="2">Female</option>
+                    </select>
+
+                {% else %}
+                    <select name="{{ feature }}" id="{{ feature }}" class="form-select" required>
+                        <option value="" disabled selected>Select level...</option>
+                        <option value="1">1 - Very Low</option>
+                        <option value="2">2 - Low</option>
+                        <option value="3">3 - Mild</option>
+                        <option value="4">4 - Moderate</option>
+                        <option value="5">5 - Medium</option>
+                        <option value="6">6 - Elevated</option>
+                        <option value="7">7 - High</option>
+                        <option value="8">8 - Very High</option>
+                        <option value="9">9 - Severe</option>
+                    </select>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-danger btn-lg mt-2">Predict</button>
+    </form>
+
+    {% if prediction is not none %}
+        <div class="alert alert-warning mt-4">
+            <h3 class="mb-1">Predicted Progression Score: {{ prediction }}</h3>
+            <p class="mb-0">Scale: 1 = Low risk, 2 = Medium risk, 3 = High risk</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

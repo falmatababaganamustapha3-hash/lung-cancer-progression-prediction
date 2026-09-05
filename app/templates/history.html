@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Your Prediction History</h2>
+    {% if records %}
+        <form method="POST" action="{{ url_for('main.reset_history') }}" onsubmit="return confirm('Are you sure you want to clear all your prediction history? This cannot be undone.');">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Reset History</button>
+        </form>
+    {% endif %}
+</div>
+
+{% if records %}
+    <div class="card p-4 mb-4">
+        <h5>Progression Score Trend</h5>
+        <canvas id="historyChart" height="100"></canvas>
+    </div>
+
+    <div class="card p-4">
+        <h5 class="mb-3">All Records</h5>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Predicted Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.created_at }}</td>
+                    <td>{{ record.result }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script>
+        const labels = [{% for record in records|reverse %}"{{ record.created_at.strftime('%b %d, %H:%M') }}",{% endfor %}];
+        const scores = [{% for record in records|reverse %}{{ record.result }},{% endfor %}];
+
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Progression Score',
+                    data: scores,
+                    borderColor: 'rgb(15, 118, 110)',
+                    backgroundColor: 'rgba(15, 118, 110, 0.1)',
+                    tension: 0.2,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    y: { min: 1, max: 3, ticks: { stepSize: 1 } }
+                }
+            }
+        });
+    </script>
+{% else %}
+    <div class="card p-4 text-center">
+        <p class="mb-0">You haven't made any predictions yet.</p>
+        <a href="/predict" class="btn btn-danger mt-3">Make Your First Prediction</a>
+    </div>
+{% endif %}
+{% endblock %}
